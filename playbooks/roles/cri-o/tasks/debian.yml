@@ -1,0 +1,26 @@
+---
+- name: Add apt repository
+  block:
+    - name: Ensure apt keyring directory exists
+      ansible.builtin.file:
+        dest: '/etc/apt/keyrings'
+        mode: '0755'
+        state: directory
+    - name: Download key for apt repository
+      ansible.builtin.get_url:
+        url: "https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v{{ kubernetes_minor_version }}/deb/Release.key"
+        dest: /etc/apt/keyrings/cri-o.asc
+        mode: '0644'
+    - name: Add apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/cri-o.asc] https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v{{ kubernetes_minor_version }}/deb/ /"
+        state: present
+        filename: cri-o
+- name: Install cri-o
+  ansible.builtin.apt:
+    name: cri-o
+- name: Enable cri-o service
+  ansible.builtin.service:
+    name: crio.service
+    state: started
+    enabled: true

@@ -1,0 +1,22 @@
+---
+- name: Add apt repository
+  block:
+    - name: Ensure apt keyring directory exists
+      ansible.builtin.file:
+        dest: '/etc/apt/keyrings'
+        mode: '0755'
+        state: directory
+    - name: Download apt key
+      ansible.builtin.get_url:
+        url: "https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_minor_version }}/deb/Release.key"
+        dest: "/etc/apt/keyrings/kubernetes.asc"
+    - name: Add apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes.asc] https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_minor_version }}/deb/ /"
+        state: present
+        filename: kubernetes
+- name: Install cni packages
+  ansible.builtin.apt:
+    name:
+      - kubernetes-cni
+      - cri-tools

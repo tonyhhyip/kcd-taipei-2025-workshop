@@ -1,0 +1,20 @@
+---
+- name: Setup kubelet
+  hosts: all
+  become: true
+  tasks:
+    - name: Include variables
+      ansible.builtin.include_vars:
+        file: ../variables.yml
+    - name: Include nodes roles
+      ansible.builtin.include_role:
+        name: nodes
+    - name: Include CNI roles
+      ansible.builtin.include_role:
+        name: cni
+    - name: Include cri-o roles
+      ansible.builtin.include_role:
+        name: cri-o
+    - name: Include kubelet roles
+      ansible.builtin.include_role:
+        name: kubelet

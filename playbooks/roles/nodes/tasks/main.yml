@@ -1,0 +1,41 @@
+---
+- name: Include default variables
+  ansible.builtin.include_vars: ../vars/main.yml
+
+- name: Include release specific variables
+  ansible.builtin.include_vars: "{{ _loop_var }}"
+  loop: "{{ query('first_found', _params) }}"
+  loop_control:
+    loop_var: _loop_var
+  vars:
+    _params:
+      files:
+        - "{{ ansible_distribution | lower }}-{{ ansible_distribution_version | lower }}.yml"
+        - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_os_family | lower }}-{{ ansible_distribution_version | lower }}.yml"
+        - "{{ ansible_os_family | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+        - "{{ ansible_os_family | lower }}.yml"
+      paths:
+        - ../vars
+      skip: true
+
+- name: Configure Kernel Module
+  community.general.modprobe:
+    name: "{{ item }}"
+  with_items: "{{ nodes_modules }}"
+- name: Configure auto load module
+  ansible.builtin.template:
+    src: 'templates/kubernetes.conf.j2'
+    dest: '/etc/modules-load.d/kubernetes.conf'
+    mode: '0644'
+- name: Configure sysctl
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: '1'
+    sysctl_file: '/etc/sysctl.d/kubernetes.conf'
+  with_items:
+    - net.ipv4.ip_forward
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-arptables
+    - net.bridge.bridge-nf-call-ip6tables
