@@ -1,3 +1,0 @@
-= Copywrite Notice
-
-* Ansible playbooks in directory playbooks is based on works in https://github.com/alvistack, which is licensed under Apache-2.0
