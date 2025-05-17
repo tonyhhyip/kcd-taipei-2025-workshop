@@ -19,7 +19,7 @@ source "qemu" "main" {
   format           = "raw"
   accelerator      = "kvm"
 
-  disk_size = "20G"
+  disk_size = "4G"
 
   disk_image = false
 
