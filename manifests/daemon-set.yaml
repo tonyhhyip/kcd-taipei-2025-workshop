@@ -1,0 +1,44 @@
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: daemon-set
+  namespace: envoy-gateway-system
+spec:
+  provider:
+    type: Kubernetes
+    kubernetes:
+      envoyService:
+        type: ClusterIP
+      envoyDaemonSet:
+        strategy:
+          type: RollingUpdate
+        patch:
+          type: StrategicMerge
+          value:
+            spec:
+              template:
+                spec:
+                  containers:
+                    - name: envoy
+                      ports:
+                        - name: http
+                          containerPort: 10080
+                          protocol: TCP
+                          hostPort: 80
+                        - name: https
+                          containerPort: 10443
+                          protocol: TCP
+                          hostPort: 443
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: daemon-set
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+  parametersRef:
+    group: gateway.envoyproxy.io
+    kind: EnvoyProxy
+    name: daemon-set
+    namespace: envoy-gateway-system
