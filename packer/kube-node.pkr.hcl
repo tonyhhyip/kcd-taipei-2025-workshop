@@ -16,7 +16,7 @@ source "qemu" "main" {
   iso_checksum = "sha256:d6dab0c3a657988501b4bd76f1297c053df710e06e0c3aece60dead24f270b4d"
 
   output_directory = "output"
-  format           = "raw"
+  format           = "qcow2"
   accelerator      = "kvm"
 
   disk_size = "4G"
@@ -49,7 +49,7 @@ build {
 
   provisioner "shell" {
     inline = [
-      "sudo cloud-init clean"
+      "sudo cloud-init clean --logs --machine-id --configs all --seed",
     ]
   }
 }
